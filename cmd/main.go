@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
@@ -11,18 +12,13 @@ import (
 	serv "lowfoodmap-tg-bot/internal/service"
 	"net/http"
 	"os"
+	"strings"
 )
 
-func initHandler(db *pgx.Conn, handler *hand.Handler) http.Handler {
+func initHandler(handler *hand.Handler) http.Handler {
 	r := mux.NewRouter()
 	r.HandleFunc("/product",
-		func(w http.ResponseWriter, r *http.Request) {
-			// GetProduct (db, w, r)
-		}).Methods(http.MethodGet)
-	r.HandleFunc("/product",
-		func(w http.ResponseWriter, r *http.Request) {
-			// GetProductsCategory (db, w, r)
-		}).Methods(http.MethodGet)
+		handler.GetProduct).Methods(http.MethodGet)
 	return r
 }
 
@@ -31,9 +27,14 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("error loading .env file: %s", err)
 	}
+	dbLogin := os.Getenv("POSTGRES_USER")
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+	dbName := os.Getenv("POSTGRES_DB")
+	hostPort := strings.Split(os.Getenv("POSTGRES_PORT"), ":")[0]
+	dbURL := fmt.Sprintf("postgres://%s:%s@localhost:%s/%s", dbLogin, dbPassword, hostPort, dbName)
 
 	// connect to db
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DB_HOST"))
+	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {
 		log.Fatalf("cannot connect to database: %s", err)
 	}
@@ -44,7 +45,7 @@ func main() {
 	handler := hand.NewHandler(service)
 
 	// handle requests
-	http.Handle("/", initHandler(conn, handler))
+	http.Handle("/", initHandler(handler))
 	contactHttpErr := http.ListenAndServe(":8080", nil)
 	if contactHttpErr != nil {
 		log.Fatalf("server startup error: %v\n", contactHttpErr)
