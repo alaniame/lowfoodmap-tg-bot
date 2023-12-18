@@ -40,6 +40,7 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
+	// layers
 	repository := repo.NewRepository(conn)
 	service := serv.NewService(repository)
 	handler := hand.NewHandler(service)
