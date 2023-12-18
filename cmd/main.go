@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	repo := repository.NewRepository
+	repo := repository.NewRepository()
 	service := service.NewService(repo)
 	handler := handler.NewHandler(service)
 }

@@ -1,9 +1,11 @@
 package handler
 
+import "lowfoodmap-tg-bot/internal/service"
+
 type Handler struct {
-	service *Service
+	service *service.Service
 }
 
-func NewHandler(service *Service) *Handler {
+func NewHandler(service *service.Service) *Handler {
 	return &Handler{service: service}
 }
