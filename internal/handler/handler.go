@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"lowfoodmap-tg-bot/internal/service"
+	"github.com/alaniame/lowfoodmap-tg-bot/internal/service"
 	"net/http"
 )
 
@@ -26,5 +26,9 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responseString := fmt.Sprintf("Продукт: %s", product.ProductName)
-	w.Write([]byte(responseString))
+	_, err = w.Write([]byte(responseString))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

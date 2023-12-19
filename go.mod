@@ -1,4 +1,4 @@
-module lowfoodmap-tg-bot
+module github.com/alaniame/lowfoodmap-tg-bot
 
 go 1.21
 

@@ -1,6 +1,6 @@
 package service
 
-import "lowfoodmap-tg-bot/internal/repository"
+import "github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 
 type Service struct {
 	repo repository.Repository

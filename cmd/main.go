@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	hand "github.com/alaniame/lowfoodmap-tg-bot/internal/handler"
+	repo "github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
+	serv "github.com/alaniame/lowfoodmap-tg-bot/internal/service"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
 	"log"
-	hand "lowfoodmap-tg-bot/internal/handler"
-	repo "lowfoodmap-tg-bot/internal/repository"
-	serv "lowfoodmap-tg-bot/internal/service"
 	"net/http"
 	"os"
 	"strings"
@@ -38,7 +38,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot connect to database: %s", err)
 	}
-	defer conn.Close(context.Background())
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			log.Fatalf("db close error: %v\n", err)
+		}
+	}(conn, context.Background())
 
 	// layers
 	repository := repo.NewRepository(conn)
