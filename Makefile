@@ -12,3 +12,6 @@ stop:
 
 restart:
 	make stop && make start
+
+lint:
+	golangci-lint run
