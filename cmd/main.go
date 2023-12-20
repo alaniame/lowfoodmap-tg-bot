@@ -22,6 +22,10 @@ func initHandler(handler *hand.Handler) http.Handler {
 	return r
 }
 
+func example() {
+	unusedVar := 5
+}
+
 func main() {
 	// config
 	if err := godotenv.Load(); err != nil {
