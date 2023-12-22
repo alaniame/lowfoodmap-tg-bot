@@ -11,25 +11,14 @@ type Repository struct {
 }
 
 type Product struct {
-	Id            int
 	ProductName   string
-	CategoryId    int
+	CategoryId    ProductCategory
 	Stage         int
 	PortionHigh   int
 	PortionMedium int
 	PortionLow    int
 	PortionSize   string
-	CarbId        int
-}
-
-type ProductCategory struct {
-	CategoryId   int
-	CategoryName string
-}
-
-type CarbType struct {
-	CarbId   int
-	CarbName string
+	CarbId        CarbType
 }
 
 func NewRepository(conn *pgx.Conn) Repository {
