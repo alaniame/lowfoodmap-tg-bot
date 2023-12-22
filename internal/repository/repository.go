@@ -90,7 +90,7 @@ func (r *Repository) AddProducts(products []Product) {
 	for _, product := range products {
 		addProduct := fmt.Sprintf(`
 			INSERT INTO products (product_name, category_id, stage, portion_high, portion_medium, portion_low, portion_size)
-			VALUES ('%s', '%d', '%d', '%d', '%d', '%d', '%s')  ON CONFLICT (product_name) DO NOTHING;;`,
+			VALUES ('%s', '%d', '%d', '%d', '%d', '%d', '%s')  ON CONFLICT (product_name) DO NOTHING;`,
 			product.ProductName,
 			product.CategoryId,
 			product.Stage,
@@ -101,6 +101,16 @@ func (r *Repository) AddProducts(products []Product) {
 		_, err := r.conn.Exec(context.Background(), addProduct)
 		if err != nil {
 			log.Fatalf("error adding product to table: %v\n", err)
+		}
+
+		for _, carbId := range product.CarbId {
+			addCarbTypeRelation := fmt.Sprintf(`INSERT INTO product_carb_types 
+				(product_id, carb_id) VALUES (currval('products_id_seq'), '%d')
+				ON CONFLICT DO NOTHING;`, carbId)
+			_, err = r.conn.Exec(context.Background(), addCarbTypeRelation)
+			if err != nil {
+				log.Fatalf("error adding carb type relation to table: %v\n", err)
+			}
 		}
 	}
 }
