@@ -19,6 +19,8 @@ func initHandler(handler *hand.Handler) http.Handler {
 	r := mux.NewRouter()
 	r.HandleFunc("/product",
 		handler.GetProduct).Methods(http.MethodGet)
+	r.HandleFunc("/upload_data",
+		handler.UploadData).Methods(http.MethodPost)
 	return r
 }
 
