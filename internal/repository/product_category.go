@@ -20,8 +20,8 @@ var productCategoryMap = map[string]ProductCategory{
 	"Молоко, молочные продукты и их заменители": MilkDairyProductsAndTheirSubstitutes,
 	"Орехи, бобовые и семена":                   NutsLegumesAndSeeds,
 	"Напитки": Drinks,
-	"Специи, травы, соусы и спреды":   SpicesHerbsSaucesAndSpreads,
-	"Хлеб, злаки, макаронные изделия": BreadCerealsPasta,
+	"Специи, травы, соусы и спреды":    SpicesHerbsSaucesAndSpreads,
+	"Хлеб, злаки и макаронные изделия": BreadCerealsPasta,
 }
 
 func StringToProductCategory(s string) (ProductCategory, error) {

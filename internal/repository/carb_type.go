@@ -1,6 +1,9 @@
 package repository
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type CarbType int
 
@@ -16,23 +19,28 @@ const (
 )
 
 var carbTypeMap = map[string]CarbType{
-	"Фруктаны":  Fructans,
-	"Фруктоза":  Fructose,
-	"Сорбитол":  Sorbitol,
-	"Маннитол":  Mannitol,
-	"Галактаны": Galactans,
-	"Галактоолигосахариды (ГОС)": Galactooligosaccharides,
-	"Лактоза":   Lactose,
-	"Талактаны": Talaktans,
+	"фруктаны":  Fructans,
+	"фруктоза":  Fructose,
+	"сорбитол":  Sorbitol,
+	"маннитол":  Mannitol,
+	"галактаны": Galactans,
+	"галактоолигосахариды(гос)": Galactooligosaccharides,
+	"лактоза":   Lactose,
+	"талактаны": Talaktans,
 }
 
-func StringToCarbType(s string) (CarbType, error) {
+func StringToCarbTypes(s string) ([]CarbType, error) {
 	if s == "" {
-		return 0, nil
+		return nil, nil
 	}
-	carbType, exists := carbTypeMap[s]
-	if !exists {
-		return 0, fmt.Errorf("unknown type: %s", s)
+	var carbTypes []CarbType
+	for _, carbStr := range strings.Split(s, " ") {
+		normalizedCarbStr := strings.ToLower(carbStr)
+		carbType, exists := carbTypeMap[normalizedCarbStr]
+		if !exists {
+			return nil, fmt.Errorf("unknown type: %s", carbStr)
+		}
+		carbTypes = append(carbTypes, carbType)
 	}
-	return carbType, nil
+	return carbTypes, nil
 }

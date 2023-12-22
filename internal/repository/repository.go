@@ -16,7 +16,7 @@ type Product struct {
 	PortionMedium int
 	PortionLow    int
 	PortionSize   string
-	CarbId        CarbType
+	CarbId        []CarbType
 	Stage         int
 	CategoryId    ProductCategory
 }

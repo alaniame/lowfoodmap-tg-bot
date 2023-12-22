@@ -72,10 +72,10 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			portionHigh = 0
 		}
-		carbType, err := repository.StringToCarbType(record[5])
+		carbTypes, err := repository.StringToCarbTypes(record[5])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Fatalf("error converting CarbType: %v", err)
+			log.Fatalf("error converting CarbTypes: %v", err)
 			return
 		}
 		stage, err := strconv.Atoi(record[6])
@@ -96,7 +96,7 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 			PortionMedium: portionMedium,
 			PortionLow:    portionLow,
 			PortionSize:   record[4],
-			CarbId:        carbType,
+			CarbId:        carbTypes,
 			Stage:         stage,
 			CategoryId:    category,
 		}
