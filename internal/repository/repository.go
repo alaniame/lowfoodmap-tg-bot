@@ -23,7 +23,8 @@ type Product struct {
 }
 
 func NewRepository(conn *pgx.Conn) Repository {
-	createTableSQL := `CREATE TABLE IF NOT EXISTS product_categories (
+	createTableSQL := `
+	CREATE TABLE IF NOT EXISTS product_categories (
 		category_id SERIAL PRIMARY KEY,
 		category_name VARCHAR(255) NOT NULL UNIQUE
 	);
@@ -83,4 +84,23 @@ func (r *Repository) GetProduct(name string) (*Product, error) {
 	var prod Product
 	err := row.Scan(&prod.ProductName)
 	return &prod, err
+}
+
+func (r *Repository) AddProducts(products []Product) {
+	for _, product := range products {
+		addProduct := fmt.Sprintf(`
+			INSERT INTO products (product_name, category_id, stage, portion_high, portion_medium, portion_low, portion_size)
+			VALUES ('%s', '%d', '%d', '%d', '%d', '%d', '%s')  ON CONFLICT (product_name) DO NOTHING;;`,
+			product.ProductName,
+			product.CategoryId,
+			product.Stage,
+			product.PortionHigh,
+			product.PortionMedium,
+			product.PortionLow,
+			product.PortionSize)
+		_, err := r.conn.Exec(context.Background(), addProduct)
+		if err != nil {
+			log.Fatalf("error adding product to table: %v\n", err)
+		}
+	}
 }

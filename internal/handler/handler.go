@@ -7,6 +7,7 @@ import (
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/service"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 )
@@ -48,7 +49,12 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
+	defer func(file multipart.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatalf("file close error: %v\n", err)
+		}
+	}(file)
 	csvReader := csv.NewReader(file)
 	var products []repository.Product
 	for {
@@ -102,5 +108,5 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 		}
 		products = append(products, product)
 	}
-	service.UploadData(products)
+	h.service.UploadData(products)
 }

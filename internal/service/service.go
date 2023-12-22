@@ -14,6 +14,6 @@ func (s *Service) GetProduct(name string) (*repository.Product, error) {
 	return s.repo.GetProduct(name)
 }
 
-func UploadData(products []repository.Product) {
-
+func (s *Service) UploadData(products []repository.Product) {
+	s.repo.AddProducts(products)
 }
