@@ -41,9 +41,15 @@ func NewRepository(conn *pgx.Conn) Repository {
 		portion_medium INT,
 		portion_low INT,
 		portion_size VARCHAR(255),
-		carb_id INT,
-		FOREIGN KEY (category_id) REFERENCES product_categories (category_id),
-    	FOREIGN KEY (carb_id) REFERENCES carb_types (carb_id)
+		FOREIGN KEY (category_id) REFERENCES product_categories (category_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS product_carb_types (
+	    id SERIAL PRIMARY KEY,
+	  	product_id INT NOT NULL,
+	  	carb_id INT NOT NULL,
+	  	FOREIGN KEY (carb_id) REFERENCES carb_types(carb_id),
+	  	FOREIGN KEY (product_id) REFERENCES products(id)
 	);`
 	_, createErr := conn.Exec(context.Background(), createTableSQL)
 	if createErr != nil {
