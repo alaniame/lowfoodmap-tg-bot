@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v4"
 	"log"
 )
@@ -51,9 +52,25 @@ func NewRepository(conn *pgx.Conn) Repository {
 	  	FOREIGN KEY (carb_id) REFERENCES carb_types(carb_id),
 	  	FOREIGN KEY (product_id) REFERENCES products(id)
 	);`
-	_, createErr := conn.Exec(context.Background(), createTableSQL)
-	if createErr != nil {
-		log.Fatalf("error creating table: %v\n", createErr)
+	_, err := conn.Exec(context.Background(), createTableSQL)
+	if err != nil {
+		log.Fatalf("error creating table: %v\n", err)
+	}
+
+	for carbName := range carbTypeMap {
+		addInitialData := fmt.Sprintf("INSERT INTO carb_types (carb_name) VALUES ('%s') ON CONFLICT (carb_name) DO NOTHING;", carbName)
+		_, err = conn.Exec(context.Background(), addInitialData)
+		if err != nil {
+			log.Fatalf("error adding carbTypes to table: %v\n", err)
+		}
+	}
+
+	for categoryName := range productCategoryMap {
+		addInitialData := fmt.Sprintf("INSERT INTO product_categories (category_name) VALUES ('%s') ON CONFLICT (category_name) DO NOTHING;", categoryName)
+		_, err = conn.Exec(context.Background(), addInitialData)
+		if err != nil {
+			log.Fatalf("error adding productCategories to table: %v\n", err)
+		}
 	}
 
 	return Repository{conn: conn}
