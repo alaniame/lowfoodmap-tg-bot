@@ -13,3 +13,7 @@ func NewService(repo repository.Repository) *Service {
 func (s *Service) GetProduct(name string) (*repository.Product, error) {
 	return s.repo.GetProduct(name)
 }
+
+func UploadData(products []repository.Product) {
+
+}

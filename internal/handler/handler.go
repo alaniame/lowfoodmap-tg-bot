@@ -3,9 +3,12 @@ package handler
 import (
 	"encoding/csv"
 	"fmt"
+	"github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/service"
 	"io"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -47,6 +50,7 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	csvReader := csv.NewReader(file)
+	var products []repository.Product
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
@@ -56,6 +60,47 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(record)
+		portionHigh, err := strconv.Atoi(record[1])
+		if err != nil {
+			portionHigh = 0
+		}
+		portionMedium, err := strconv.Atoi(record[2])
+		if err != nil {
+			portionHigh = 0
+		}
+		portionLow, err := strconv.Atoi(record[3])
+		if err != nil {
+			portionHigh = 0
+		}
+		carbType, err := repository.StringToCarbType(record[5])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Fatalf("error converting CarbType: %v", err)
+			return
+		}
+		stage, err := strconv.Atoi(record[6])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Fatalf("error converting Stage: %v", err)
+			return
+		}
+		category, err := repository.StringToProductCategory(record[7])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Fatalf("error converting Category: %v", err)
+			return
+		}
+		product := repository.Product{
+			ProductName:   record[0],
+			PortionHigh:   portionHigh,
+			PortionMedium: portionMedium,
+			PortionLow:    portionLow,
+			PortionSize:   record[4],
+			CarbId:        carbType,
+			Stage:         stage,
+			CategoryId:    category,
+		}
+		products = append(products, product)
 	}
+	service.UploadData(products)
 }
