@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/csv"
+	"github.com/alaniame/lowfoodmap-tg-bot"
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	"io"
 	"log"
@@ -11,20 +12,20 @@ import (
 )
 
 type Service struct {
-	repo repository.Repository
+	repo *repository.Repository
 }
 
-func NewService(repo repository.Repository) *Service {
+func NewService(repo *repository.Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) GetProduct(name string) (*repository.Product, error) {
+func (s *Service) GetProduct(name string) (*entity.Product, error) {
 	return s.repo.GetProduct(name)
 }
 
 func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
 	csvReader := csv.NewReader(file)
-	var products []repository.Product
+	var products []entity.Product
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
@@ -46,7 +47,7 @@ func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
 		if err != nil {
 			portionHigh = 0
 		}
-		carbTypes, err := repository.StringToCarbTypes(record[5])
+		carbTypes, err := s.repo.GetCarbIds(record[5])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Fatalf("error converting CarbTypes: %v", err)
@@ -58,13 +59,13 @@ func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
 			log.Fatalf("error converting Stage: %v", err)
 			return
 		}
-		category, err := repository.StringToProductCategory(record[7])
+		category, err := s.repo.GetProductCategoryId(record[7])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Fatalf("error converting Category: %v", err)
 			return
 		}
-		product := repository.Product{
+		product := entity.Product{
 			ProductName:   record[0],
 			PortionHigh:   portionHigh,
 			PortionMedium: portionMedium,

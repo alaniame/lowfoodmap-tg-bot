@@ -24,12 +24,10 @@ func main() {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	// layers
 	repository := repo.NewRepository(conn)
 	service := serv.NewService(repository)
 	handler := hand.NewHandler(service)
 
-	// handle requests
 	http.Handle("/", initHandler(handler))
 	contactHttpErr := http.ListenAndServe(":8080", nil)
 	if contactHttpErr != nil {
