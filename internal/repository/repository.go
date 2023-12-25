@@ -24,57 +24,6 @@ type Product struct {
 }
 
 func NewRepository(conn *pgx.Conn) Repository {
-	createTableSQL := `
-	CREATE TABLE IF NOT EXISTS product_categories (
-		category_id SERIAL PRIMARY KEY,
-		category_name VARCHAR(255) NOT NULL UNIQUE
-	);
-
-	CREATE TABLE IF NOT EXISTS carb_types (
-		carb_id SERIAL PRIMARY KEY,
-		carb_name VARCHAR(255) NOT NULL UNIQUE
-	);
-
-	CREATE TABLE IF NOT EXISTS products (
-		id SERIAL PRIMARY KEY,
-		product_name VARCHAR(255) NOT NULL UNIQUE,
-		category_id INT NOT NULL,
-		stage INT NOT NULL,
-		portion_high INT,
-		portion_medium INT,
-		portion_low INT,
-		portion_size VARCHAR(255),
-		FOREIGN KEY (category_id) REFERENCES product_categories (category_id)
-	);
-	
-	CREATE TABLE IF NOT EXISTS product_carb_types (
-	    id SERIAL PRIMARY KEY,
-	  	product_id INT NOT NULL,
-	  	carb_id INT NOT NULL,
-	  	FOREIGN KEY (carb_id) REFERENCES carb_types(carb_id),
-	  	FOREIGN KEY (product_id) REFERENCES products(id)
-	);`
-	_, err := conn.Exec(context.Background(), createTableSQL)
-	if err != nil {
-		log.Fatalf("error creating table: %v\n", err)
-	}
-
-	for carbName := range carbTypeMap {
-		addInitialData := fmt.Sprintf("INSERT INTO carb_types (carb_name) VALUES ('%s') ON CONFLICT (carb_name) DO NOTHING;", carbName)
-		_, err = conn.Exec(context.Background(), addInitialData)
-		if err != nil {
-			log.Fatalf("error adding carbTypes to table: %v\n", err)
-		}
-	}
-
-	for categoryName := range productCategoryMap {
-		addInitialData := fmt.Sprintf("INSERT INTO product_categories (category_name) VALUES ('%s') ON CONFLICT (category_name) DO NOTHING;", categoryName)
-		_, err = conn.Exec(context.Background(), addInitialData)
-		if err != nil {
-			log.Fatalf("error adding productCategories to table: %v\n", err)
-		}
-	}
-
 	return Repository{conn: conn}
 }
 
