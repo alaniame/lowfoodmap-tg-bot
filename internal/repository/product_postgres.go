@@ -30,7 +30,11 @@ func (r ProductPostgres) AddProducts(products []entity.Product) {
 		err = tx.QueryRow(context.Background(), addProduct, product.ProductName, product.CategoryId, product.Stage, product.PortionHigh, product.PortionMedium, product.PortionLow, product.PortionSize).Scan(&productId)
 		if err != nil {
 			if !errors.Is(err, pgx.ErrNoRows) {
-				tx.Rollback(context.Background())
+				err := tx.Rollback(context.Background())
+				if err != nil {
+					log.Fatalf("rollback error: %v\n", err)
+					return
+				}
 				log.Fatalf("error adding product to table: %v\n", err)
 				return
 			} else {
@@ -46,7 +50,11 @@ func (r ProductPostgres) AddProducts(products []entity.Product) {
 				ON CONFLICT DO NOTHING;`, carbId)
 				_, err = tx.Exec(context.Background(), addCarbTypeRelation)
 				if err != nil {
-					tx.Rollback(context.Background())
+					err := tx.Rollback(context.Background())
+					if err != nil {
+						log.Fatalf("rollback error: %v\n", err)
+						return
+					}
 					log.Fatalf("error adding carb type relation to table: %v\n", err)
 					return
 				}
