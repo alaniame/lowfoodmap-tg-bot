@@ -13,7 +13,7 @@ type ProductCategory interface {
 	GetProductCategoryId(categoryName string) (int, error)
 }
 
-type XProduct interface {
+type Product interface {
 	AddProducts(products []entity.Product)
 	GetProduct(productName string) (*entity.Product, error)
 }
@@ -21,13 +21,13 @@ type XProduct interface {
 type Repository struct {
 	CarbType
 	ProductCategory
-	XProduct
+	Product
 }
 
 func NewRepository(conn *pgx.Conn) *Repository {
 	return &Repository{
 		CarbType:        NewCarbTypePostgres(conn),
 		ProductCategory: NewProductCategoryPostgres(conn),
-		XProduct:        NewProductPostgres(conn),
+		Product:         NewProductPostgres(conn),
 	}
 }
