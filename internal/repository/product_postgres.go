@@ -13,10 +13,6 @@ type ProductPostgres struct {
 	conn *pgx.Conn
 }
 
-func NewProductPostgres(conn *pgx.Conn) *ProductPostgres {
-	return &ProductPostgres{conn: conn}
-}
-
 func (r ProductPostgres) AddProducts(products []entity.Product) error {
 	for _, product := range products {
 		tx, err := r.conn.Begin(context.Background())

@@ -12,12 +12,6 @@ type Product interface {
 	stringToProduct(record []string) (entity.Product, error)
 }
 
-type Service struct {
-	Product
-}
-
-func NewService(repos *repository.Repository) *Service {
-	return &Service{
-		Product: NewProductService(repos.Product, repos.ProductCategory, repos.CarbType),
-	}
+func NewProductService(product repository.Product, productCategory repository.ProductCategory, carbType repository.CarbType) *ProductService {
+	return &ProductService{product: product, productCategory: productCategory, carbType: carbType}
 }

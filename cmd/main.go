@@ -15,8 +15,10 @@ func main() {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	repository := repo.NewRepository(conn)
-	service := serv.NewService(repository)
+	productRepository := repo.NewProductRepository(conn)
+	productCategoryRepository := repo.NewProductCategoryRepository(conn)
+	CarbTypeRepository := repo.NewCarbTypeRepository(conn)
+	service := serv.NewProductService(productRepository, productCategoryRepository, CarbTypeRepository)
 	handler := hand.NewHandler(service)
 
 	http.Handle("/", handler.InitRoutes())

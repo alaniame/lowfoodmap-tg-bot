@@ -10,10 +10,6 @@ type CarbTypePostgres struct {
 	conn *pgx.Conn
 }
 
-func NewCarbTypePostgres(conn *pgx.Conn) *CarbTypePostgres {
-	return &CarbTypePostgres{conn: conn}
-}
-
 func (r CarbTypePostgres) GetCarbIds(s string) ([]int, error) {
 	if s == "" {
 		return nil, nil
