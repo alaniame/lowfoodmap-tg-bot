@@ -14,7 +14,7 @@ type ProductCategory interface {
 }
 
 type Product interface {
-	AddProducts(products []entity.Product)
+	AddProducts(products []entity.Product) error
 	GetProduct(productName string) (*entity.Product, error)
 }
 
