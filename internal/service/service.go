@@ -1,7 +1,7 @@
 package service
 
 import (
-	entity "github.com/alaniame/lowfoodmap-tg-bot"
+	"github.com/alaniame/lowfoodmap-tg-bot/internal/entity"
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	"mime/multipart"
 )
