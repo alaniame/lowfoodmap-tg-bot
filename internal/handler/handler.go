@@ -24,7 +24,7 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	product, err := h.service.GetProduct(name)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	responseString := fmt.Sprintf("Продукт: %s", product.ProductName)
@@ -48,8 +48,12 @@ func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
 	defer func(file multipart.File) {
 		err := file.Close()
 		if err != nil {
-			log.Fatalf("file close error: %v\n", err)
+			log.Printf("file close error: %v\n", err)
 		}
 	}(file)
-	h.service.UploadData(w, file)
+	err = h.service.UploadData(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

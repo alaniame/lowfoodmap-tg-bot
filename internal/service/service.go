@@ -2,12 +2,11 @@ package service
 
 import (
 	"encoding/csv"
+	"fmt"
 	"github.com/alaniame/lowfoodmap-tg-bot"
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	"io"
-	"log"
 	"mime/multipart"
-	"net/http"
 	"strconv"
 )
 
@@ -23,7 +22,7 @@ func (s *Service) GetProduct(name string) (*entity.Product, error) {
 	return s.repo.GetProduct(name)
 }
 
-func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
+func (s *Service) UploadData(file multipart.File) error {
 	csvReader := csv.NewReader(file)
 	var products []entity.Product
 	for {
@@ -32,8 +31,7 @@ func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
 			break
 		}
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return err
 		}
 		portionHigh, err := strconv.Atoi(record[1])
 		if err != nil {
@@ -49,21 +47,15 @@ func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
 		}
 		carbTypes, err := s.repo.GetCarbIds(record[5])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Fatalf("error converting CarbTypes: %v", err)
-			return
+			return fmt.Errorf("error converting CarbTypes: %v\n", err)
 		}
 		stage, err := strconv.Atoi(record[6])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Fatalf("error converting Stage: %v", err)
-			return
+			return fmt.Errorf("error converting Stage: %v\n", err)
 		}
 		category, err := s.repo.GetProductCategoryId(record[7])
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Fatalf("error converting Category: %v", err)
-			return
+			return fmt.Errorf("error converting Category: %v\n", err)
 		}
 		product := entity.Product{
 			ProductName:   record[0],
@@ -77,5 +69,9 @@ func (s *Service) UploadData(w http.ResponseWriter, file multipart.File) {
 		}
 		products = append(products, product)
 	}
-	s.repo.AddProducts(products)
+	err := s.repo.AddProducts(products)
+	if err != nil {
+		return err
+	}
+	return nil
 }
