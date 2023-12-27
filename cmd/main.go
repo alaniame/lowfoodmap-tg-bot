@@ -4,19 +4,9 @@ import (
 	hand "github.com/alaniame/lowfoodmap-tg-bot/internal/handler"
 	repo "github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	serv "github.com/alaniame/lowfoodmap-tg-bot/internal/service"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
-
-func initHandler(handler *hand.Handler) http.Handler {
-	r := mux.NewRouter()
-	r.HandleFunc("/product",
-		handler.GetProduct).Methods(http.MethodGet)
-	r.HandleFunc("/upload_data",
-		handler.UploadData).Methods(http.MethodPost)
-	return r
-}
 
 func main() {
 	conn, err := repo.NewPostgresDB()
@@ -28,7 +18,7 @@ func main() {
 	service := serv.NewService(repository)
 	handler := hand.NewHandler(service)
 
-	http.Handle("/", initHandler(handler))
+	http.Handle("/", handler.InitRoutes())
 	contactHttpErr := http.ListenAndServe(":8080", nil)
 	if contactHttpErr != nil {
 		log.Fatalf("server startup error: %v\n", contactHttpErr)
