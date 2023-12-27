@@ -1,19 +1,23 @@
 package service
 
-import "github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
+import (
+	entity "github.com/alaniame/lowfoodmap-tg-bot"
+	"github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
+	"mime/multipart"
+)
+
+type Product interface {
+	GetProduct(name string) (*entity.Product, error)
+	UploadData(file multipart.File) error
+	stringToProduct(record []string) (entity.Product, error)
+}
 
 type Service struct {
-	repo repository.Repository
+	Product
 }
 
-func NewService(repo repository.Repository) *Service {
-	return &Service{repo: repo}
-}
-
-func (s *Service) GetProduct(name string) (*repository.Product, error) {
-	return s.repo.GetProduct(name)
-}
-
-func (s *Service) UploadData(products []repository.Product) {
-	s.repo.AddProducts(products)
+func NewService(repos *repository.Repository) *Service {
+	return &Service{
+		Product: NewProductService(repos.Product, repos.ProductCategory, repos.CarbType),
+	}
 }

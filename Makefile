@@ -15,3 +15,6 @@ restart:
 
 lint:
 	golangci-lint run
+
+migrate:
+	migrate -path ./schema -database 'postgres://admin:admin@localhost:5432/products?sslmode=disable' up
