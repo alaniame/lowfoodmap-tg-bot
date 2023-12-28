@@ -18,14 +18,14 @@ type Product interface {
 	GetProduct(productName string) (*entity.Product, error)
 }
 
-func NewCarbTypeRepository(conn *pgx.Conn) *CarbTypePostgres {
-	return &CarbTypePostgres{conn: conn}
+func NewCarbTypeRepository(conn *pgx.Conn) *CarbTypeRepository {
+	return &CarbTypeRepository{conn: conn}
 }
 
-func NewProductCategoryRepository(conn *pgx.Conn) *ProductCategoryPostgres {
-	return &ProductCategoryPostgres{conn: conn}
+func NewProductCategoryRepository(conn *pgx.Conn) *ProductCategoryRepository {
+	return &ProductCategoryRepository{conn: conn}
 }
 
-func NewProductRepository(conn *pgx.Conn) *ProductPostgres {
-	return &ProductPostgres{conn: conn}
+func NewProductRepository(conn *pgx.Conn) *ProductRepository {
+	return &ProductRepository{conn: conn}
 }

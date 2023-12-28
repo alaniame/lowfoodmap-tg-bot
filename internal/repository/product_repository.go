@@ -9,11 +9,11 @@ import (
 	"log"
 )
 
-type ProductPostgres struct {
+type ProductRepository struct {
 	conn *pgx.Conn
 }
 
-func (r ProductPostgres) AddProducts(products []entity.Product) error {
+func (r ProductRepository) AddProducts(products []entity.Product) error {
 	for _, product := range products {
 		tx, err := r.conn.Begin(context.Background())
 		if err != nil {
@@ -59,7 +59,7 @@ func (r ProductPostgres) AddProducts(products []entity.Product) error {
 	return nil
 }
 
-func (r ProductPostgres) GetProduct(productName string) (*entity.Product, error) {
+func (r ProductRepository) GetProduct(productName string) (*entity.Product, error) {
 	query := `SELECT product_name FROM products WHERE product_name = $1;`
 	row := r.conn.QueryRow(context.Background(), query, productName)
 	var prod entity.Product

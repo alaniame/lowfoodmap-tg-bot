@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-type CarbTypePostgres struct {
+type CarbTypeRepository struct {
 	conn *pgx.Conn
 }
 
-func (r CarbTypePostgres) GetCarbIds(s string) ([]int, error) {
+func (r CarbTypeRepository) GetCarbIds(s string) ([]int, error) {
 	if s == "" {
 		return nil, nil
 	}
