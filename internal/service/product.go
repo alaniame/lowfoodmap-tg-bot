@@ -16,10 +16,6 @@ type ProductService struct {
 	carbType        repository.CarbType
 }
 
-func NewProductService(product repository.Product, productCategory repository.ProductCategory, carbType repository.CarbType) *ProductService {
-	return &ProductService{product: product, productCategory: productCategory, carbType: carbType}
-}
-
 func (s *ProductService) GetProduct(name string) (*entity.Product, error) {
 	return s.product.GetProduct(name)
 }
