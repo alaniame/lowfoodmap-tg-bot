@@ -2,9 +2,9 @@ package main
 
 import (
 	hand "github.com/alaniame/lowfoodmap-tg-bot/internal/handler"
-	"github.com/alaniame/lowfoodmap-tg-bot/internal/postgres"
 	repo "github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	serv "github.com/alaniame/lowfoodmap-tg-bot/internal/service"
+	"github.com/alaniame/lowfoodmap-tg-bot/pkg/postgres"
 	"log"
 	"net/http"
 )
