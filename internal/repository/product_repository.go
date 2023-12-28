@@ -59,10 +59,39 @@ func (r ProductRepository) AddProducts(products []entity.Product) error {
 	return nil
 }
 
-func (r ProductRepository) GetProduct(productName string) (*entity.Product, error) {
-	query := `SELECT product_name FROM products WHERE product_name = $1;`
-	row := r.conn.QueryRow(context.Background(), query, productName)
-	var prod entity.Product
-	err := row.Scan(&prod.ProductName)
-	return &prod, err
+func (r ProductRepository) GetProduct(productName string) ([]entity.ProductOutput, error) {
+	query := `SELECT
+        p.product_name,
+        p.stage,
+        p.portion_high,
+        p.portion_medium,
+        p.portion_low,
+        p.portion_size,
+        string_agg(COALESCE(ct.carb_name, ''), ', ') AS carb_names
+    FROM products p
+        LEFT JOIN product_carb_types pct ON p.id = pct.product_id
+        LEFT JOIN carb_types ct ON pct.carb_id = ct.carb_id
+    WHERE LOWER(p.product_name) LIKE LOWER($1)
+    GROUP BY p.product_name, p.stage, p.portion_high, p.portion_medium, p.portion_low, p.portion_size
+    ORDER BY p.stage, p.product_name;`
+	searchPattern := "%" + productName + "%"
+	rows, err := r.conn.Query(context.Background(), query, searchPattern)
+	var prodOuts []entity.ProductOutput
+	if err != nil {
+		return prodOuts, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var prodOut entity.ProductOutput
+		err := rows.Scan(&prodOut.ProductName, &prodOut.Stage, &prodOut.PortionHigh, &prodOut.PortionMedium, &prodOut.PortionLow, &prodOut.PortionSize, &prodOut.Carbs)
+		if err != nil {
+			return prodOuts, err
+		}
+		prodOuts = append(prodOuts, prodOut)
+	}
+	if err = rows.Err(); err != nil {
+		return prodOuts, err
+	}
+
+	return prodOuts, nil
 }

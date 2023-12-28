@@ -16,7 +16,7 @@ type ProductService struct {
 	carbType        repository.CarbType
 }
 
-func (s *ProductService) GetProduct(name string) (*entity.Product, error) {
+func (s *ProductService) GetProduct(name string) ([]entity.ProductOutput, error) {
 	return s.product.GetProduct(name)
 }
 
