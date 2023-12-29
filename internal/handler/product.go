@@ -30,11 +30,8 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		productString := formatProductResponse(product)
 		responseBuilder.WriteString(productString)
 	}
-	result := responseBuilder.String()
-	if len(result) != 0 {
-		result = result[:len(result)-2]
-	}
-	_, err = w.Write([]byte(result))
+
+	_, err = w.Write([]byte(responseBuilder.String()))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
