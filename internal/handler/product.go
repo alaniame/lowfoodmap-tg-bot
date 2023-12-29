@@ -10,19 +10,22 @@ import (
 )
 
 func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	defaultError := "Что-то пошло не так, попробуйте еще раз. Мы уже занимаемся изучением проблемы"
 	name := r.URL.Query().Get("name")
 	name = strings.TrimSpace(name)
 	if name == "" {
-		http.Error(w, "product name is empty", http.StatusBadRequest)
+		log.Println("product name is empty")
+		http.Error(w, defaultError, http.StatusBadRequest)
 		return
 	}
 	products, err := h.service.GetProduct(name)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		http.Error(w, defaultError, http.StatusInternalServerError)
 		return
 	}
 	if len(products) == 0 {
-		http.Error(w, "no products found", http.StatusNotFound)
+		http.Error(w, "Продукт не найден", http.StatusNotFound)
 		return
 	}
 	var responseBuilder strings.Builder
@@ -33,7 +36,8 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	_, err = w.Write([]byte(responseBuilder.String()))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		http.Error(w, defaultError, http.StatusInternalServerError)
 		return
 	}
 }
