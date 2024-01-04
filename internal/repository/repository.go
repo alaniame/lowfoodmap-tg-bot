@@ -15,7 +15,7 @@ type ProductCategory interface {
 
 type Product interface {
 	AddProducts(products []entity.Product) error
-	GetProduct(productName string) (*entity.Product, error)
+	GetProduct(productName string) ([]entity.ProductOutput, error)
 }
 
 func NewCarbTypeRepository(conn *pgx.Conn) *CarbTypeRepository {

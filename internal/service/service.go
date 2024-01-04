@@ -7,7 +7,7 @@ import (
 )
 
 type Product interface {
-	GetProduct(name string) (*entity.Product, error)
+	GetProduct(name string) ([]entity.ProductOutput, error)
 	UploadData(file multipart.File) error
 	stringToProduct(record []string) (entity.Product, error)
 }

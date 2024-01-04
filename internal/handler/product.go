@@ -2,28 +2,66 @@ package handler
 
 import (
 	"fmt"
+	"github.com/alaniame/lowfoodmap-tg-bot/internal/entity"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"strings"
 )
 
 func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	defaultError := "Что-то пошло не так, попробуйте еще раз. Мы уже занимаемся изучением проблемы"
 	name := r.URL.Query().Get("name")
+	name = strings.TrimSpace(name)
 	if name == "" {
-		http.Error(w, "product name is empty", http.StatusBadRequest)
+		log.Println("product name is empty")
+		http.Error(w, defaultError, http.StatusBadRequest)
 		return
 	}
-	product, err := h.service.GetProduct(name)
+	products, err := h.service.GetProduct(name)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		log.Println(err.Error())
+		http.Error(w, defaultError, http.StatusInternalServerError)
 		return
 	}
-	responseString := fmt.Sprintf("Продукт: %s", product.ProductName)
-	_, err = w.Write([]byte(responseString))
+	if len(products) == 0 {
+		http.Error(w, "Продукт не найден", http.StatusNotFound)
+		return
+	}
+	var responseBuilder strings.Builder
+	for _, product := range products {
+		productString := formatProductResponse(product)
+		responseBuilder.WriteString(productString)
+	}
+
+	_, err = w.Write([]byte(responseBuilder.String()))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err.Error())
+		http.Error(w, defaultError, http.StatusInternalServerError)
 		return
 	}
+}
+
+func formatProductResponse(product entity.ProductOutput) string {
+	var responseBuilder strings.Builder
+	responseBuilder.WriteString(fmt.Sprintf("Название: **%s**\nЭтап: **%d**\n", product.ProductName, product.Stage))
+	if product.PortionHigh != 0 {
+		responseBuilder.WriteString(fmt.Sprintf("🔴 Порция с высоким содержанием веществ FODMAP: **%d грамм**\n", product.PortionHigh))
+	}
+	if product.PortionMedium != 0 {
+		responseBuilder.WriteString(fmt.Sprintf("🟡 Порция с умеренным содержанием веществ FODMAP: **%d грамм**\n", product.PortionMedium))
+	}
+	if product.PortionLow != 0 {
+		responseBuilder.WriteString(fmt.Sprintf("🟢 Порция с низким содержанием веществ FODMAP: **%d грамм**\n", product.PortionLow))
+	}
+	if product.PortionSize != "" {
+		responseBuilder.WriteString(fmt.Sprintf("Средний размер разрешенной порции: **%s**\n", product.PortionSize))
+	}
+	if product.Carbs != "" {
+		responseBuilder.WriteString(fmt.Sprintf("Углеводы: **%s**\n", product.Carbs))
+	}
+	responseBuilder.WriteString("\n")
+	return responseBuilder.String()
 }
 
 func (h *Handler) UploadData(w http.ResponseWriter, r *http.Request) {
