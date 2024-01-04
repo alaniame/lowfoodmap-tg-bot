@@ -3,13 +3,13 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"os"
 	"strings"
 )
 
-func NewPostgresDB() (*pgx.Conn, error) {
+func NewPostgresDB() (*pgxpool.Pool, error) {
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
@@ -19,9 +19,9 @@ func NewPostgresDB() (*pgx.Conn, error) {
 	hostPort := strings.Split(os.Getenv("POSTGRES_PORT"), ":")[0]
 	dbURL := fmt.Sprintf("postgres://%s:%s@localhost:%s/%s", dbLogin, dbPassword, hostPort, dbName)
 
-	conn, err := pgx.Connect(context.Background(), dbURL)
+	pool, err := pgxpool.Connect(context.Background(), dbURL)
 	if err != nil {
 		return nil, err
 	}
-	return conn, nil
+	return pool, nil
 }
