@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/entity"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type CarbType interface {
@@ -18,14 +18,14 @@ type Product interface {
 	GetProduct(productName string) ([]entity.ProductOutput, error)
 }
 
-func NewCarbTypeRepository(conn *pgx.Conn) *CarbTypeRepository {
-	return &CarbTypeRepository{conn: conn}
+func NewCarbTypeRepository(conn *pgxpool.Pool) *CarbTypeRepository {
+	return &CarbTypeRepository{pool: conn}
 }
 
-func NewProductCategoryRepository(conn *pgx.Conn) *ProductCategoryRepository {
-	return &ProductCategoryRepository{conn: conn}
+func NewProductCategoryRepository(conn *pgxpool.Pool) *ProductCategoryRepository {
+	return &ProductCategoryRepository{pool: conn}
 }
 
-func NewProductRepository(conn *pgx.Conn) *ProductRepository {
-	return &ProductRepository{conn: conn}
+func NewProductRepository(conn *pgxpool.Pool) *ProductRepository {
+	return &ProductRepository{pool: conn}
 }

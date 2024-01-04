@@ -10,14 +10,15 @@ import (
 )
 
 func main() {
-	conn, err := postgres.NewPostgresDB()
+	pool, err := postgres.NewPostgresDB()
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
+	defer pool.Close()
 
-	productRepository := repo.NewProductRepository(conn)
-	productCategoryRepository := repo.NewProductCategoryRepository(conn)
-	CarbTypeRepository := repo.NewCarbTypeRepository(conn)
+	productRepository := repo.NewProductRepository(pool)
+	productCategoryRepository := repo.NewProductCategoryRepository(pool)
+	CarbTypeRepository := repo.NewCarbTypeRepository(pool)
 	service := serv.NewProductService(productRepository, productCategoryRepository, CarbTypeRepository)
 	handler := hand.NewHandler(service)
 

@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"github.com/alaniame/lowfoodmap-tg-bot/internal/entity"
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 )
 
 type ProductRepository struct {
-	conn *pgx.Conn
+	pool *pgxpool.Pool
 }
 
 func (r ProductRepository) AddProducts(products []entity.Product) error {
 	for _, product := range products {
-		tx, err := r.conn.Begin(context.Background())
+		tx, err := r.pool.Begin(context.Background())
 		if err != nil {
 			return fmt.Errorf("error adding transaction: %v\n", err)
 		}
@@ -75,7 +76,7 @@ func (r ProductRepository) GetProduct(productName string) ([]entity.ProductOutpu
     GROUP BY p.product_name, p.stage, p.portion_high, p.portion_medium, p.portion_low, p.portion_size
     ORDER BY p.stage, p.product_name;`
 	searchPattern := "%" + productName + "%"
-	rows, err := r.conn.Query(context.Background(), query, searchPattern)
+	rows, err := r.pool.Query(context.Background(), query, searchPattern)
 	var prodOuts []entity.ProductOutput
 	if err != nil {
 		return prodOuts, err
