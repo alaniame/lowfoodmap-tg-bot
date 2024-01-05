@@ -16,8 +16,6 @@ func NewHandler(service *service.ProductService) *Handler {
 
 func (h *Handler) InitRoutes() http.Handler {
 	r := mux.NewRouter()
-	r.HandleFunc("/product",
-		h.GetProduct).Methods(http.MethodGet)
 	r.HandleFunc("/upload_data",
 		h.UploadData).Methods(http.MethodPost)
 	return r
