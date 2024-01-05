@@ -43,7 +43,10 @@ func main() {
 			ans = EscapeText(ans)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, ans)
 			msg.ParseMode = tgbotapi.ModeMarkdownV2
-			bot.Send(msg)
+			_, err := bot.Send(msg)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 
@@ -55,7 +58,6 @@ func main() {
 }
 
 func EscapeText(text string) string {
-	var replacer *strings.Replacer
-	replacer = strings.NewReplacer("(", "\\(", ")", "\\)", "-", "\\-", ".", "\\.")
+	replacer := strings.NewReplacer("(", "\\(", ")", "\\)", "-", "\\-", ".", "\\.")
 	return replacer.Replace(text)
 }
