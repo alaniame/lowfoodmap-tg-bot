@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	hand "github.com/alaniame/lowfoodmap-tg-bot/internal/handler"
 	repo "github.com/alaniame/lowfoodmap-tg-bot/internal/repository"
 	serv "github.com/alaniame/lowfoodmap-tg-bot/internal/service"
@@ -9,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -19,10 +19,14 @@ func main() {
 	}
 	defer pool.Close()
 
+	if err := pool.Ping(context.Background()); err != nil {
+		log.Fatalf("cannot ping db: %s", err)
+	}
+
 	productRepository := repo.NewProductRepository(pool)
 	productCategoryRepository := repo.NewProductCategoryRepository(pool)
-	CarbTypeRepository := repo.NewCarbTypeRepository(pool)
-	service := serv.NewProductService(productRepository, productCategoryRepository, CarbTypeRepository)
+	carbTypeRepository := repo.NewCarbTypeRepository(pool)
+	service := serv.NewProductService(productRepository, productCategoryRepository, carbTypeRepository)
 	handler := hand.NewHandler(service)
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TG_API_KEY"))
@@ -31,33 +35,31 @@ func main() {
 	}
 	updateConfig := tgbotapi.NewUpdate(0)
 	updates := bot.GetUpdatesChan(updateConfig)
-	for update := range updates {
-		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-			var ans string
-			if update.Message.Text == "/start" {
-				ans = "Добро пожаловать! Введите название продукта"
-			} else {
-				ans = handler.GetProduct(update.Message.Text)
+
+	done := make(chan struct{})
+
+	go func() {
+		for update := range updates {
+			if update.Message == nil {
+				continue
 			}
-			ans = EscapeText(ans)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, ans)
-			msg.ParseMode = tgbotapi.ModeMarkdownV2
-			_, err := bot.Send(msg)
-			if err != nil {
-				log.Println(err)
+			msg := hand.HandleMessage(update.Message, *handler)
+			if _, err := bot.Send(msg); err != nil {
+				log.Printf("send meessage eroor: %s", err)
 			}
 		}
-	}
+		done <- struct{}{}
+	}()
 
-	http.Handle("/", handler.InitRoutes())
-	contactHttpErr := http.ListenAndServe(":8080", nil)
-	if contactHttpErr != nil {
-		log.Fatalf("server startup error: %v\n", contactHttpErr)
-	}
-}
+	go func() {
+		http.Handle("/", handler.InitRoutes())
+		contactHttpErr := http.ListenAndServe(":8080", nil)
+		if contactHttpErr != nil {
+			log.Fatalf("server startup error: %v\n", contactHttpErr)
+		}
+		done <- struct{}{}
+	}()
 
-func EscapeText(text string) string {
-	replacer := strings.NewReplacer("(", "\\(", ")", "\\)", "-", "\\-", ".", "\\.")
-	return replacer.Replace(text)
+	<-done
+	<-done
 }
