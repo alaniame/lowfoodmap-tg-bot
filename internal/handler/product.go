@@ -7,60 +7,58 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strings"
+	"unicode/utf8"
 )
 
-func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetProduct(name string) string {
 	defaultError := "Что-то пошло не так, попробуйте еще раз. Мы уже занимаемся изучением проблемы"
-	name := r.URL.Query().Get("name")
 	name = strings.TrimSpace(name)
 	if name == "" {
 		log.Println("product name is empty")
-		http.Error(w, defaultError, http.StatusBadRequest)
-		return
+		return defaultError
+	}
+	length := utf8.RuneCountInString(name)
+	if length < 3 {
+		log.Println("too short name")
+		return "Введите хотя бы 3 буквы"
 	}
 	products, err := h.service.GetProduct(name)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, defaultError, http.StatusInternalServerError)
-		return
+		return defaultError
 	}
 	if len(products) == 0 {
-		http.Error(w, "Продукт не найден", http.StatusNotFound)
-		return
+		log.Println("no products")
+		return "Продукт не найден"
 	}
 	var responseBuilder strings.Builder
 	for _, product := range products {
 		productString := formatProductResponse(product)
 		responseBuilder.WriteString(productString)
 	}
-
-	_, err = w.Write([]byte(responseBuilder.String()))
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, defaultError, http.StatusInternalServerError)
-		return
-	}
+	res := responseBuilder.String()
+	return res
 }
 
 func formatProductResponse(product entity.ProductOutput) string {
 	var responseBuilder strings.Builder
-	responseBuilder.WriteString(fmt.Sprintf("Название: **%s**\nЭтап: **%d**\n", product.ProductName, product.Stage))
+	responseBuilder.WriteString(fmt.Sprintf("Название: *%s*\nЭтап: *%d*\n", product.ProductName, product.Stage))
 	if product.PortionHigh != 0 {
-		responseBuilder.WriteString(fmt.Sprintf("🔴 Порция с высоким содержанием веществ FODMAP: **%d грамм**\n", product.PortionHigh))
+		responseBuilder.WriteString(fmt.Sprintf("🔴 Порция с высоким содержанием веществ FODMAP: *%d грамм*\n", product.PortionHigh))
 	}
 	if product.PortionMedium != 0 {
-		responseBuilder.WriteString(fmt.Sprintf("🟡 Порция с умеренным содержанием веществ FODMAP: **%d грамм**\n", product.PortionMedium))
+		responseBuilder.WriteString(fmt.Sprintf("🟡 Порция с умеренным содержанием веществ FODMAP: *%d грамм*\n", product.PortionMedium))
 	}
 	if product.PortionLow != 0 {
-		responseBuilder.WriteString(fmt.Sprintf("🟢 Порция с низким содержанием веществ FODMAP: **%d грамм**\n", product.PortionLow))
+		responseBuilder.WriteString(fmt.Sprintf("🟢 Порция с низким содержанием веществ FODMAP: *%d грамм*\n", product.PortionLow))
 	}
 	if product.PortionSize != "" {
-		responseBuilder.WriteString(fmt.Sprintf("Средний размер разрешенной порции: **%s**\n", product.PortionSize))
+		responseBuilder.WriteString(fmt.Sprintf("Средний размер разрешенной порции: *%s*\n", product.PortionSize))
 	}
 	if product.Carbs != "" {
-		responseBuilder.WriteString(fmt.Sprintf("Углеводы: **%s**\n", product.Carbs))
+		responseBuilder.WriteString(fmt.Sprintf("Углеводы: *%s*\n", product.Carbs))
 	}
-	responseBuilder.WriteString("\n")
+	responseBuilder.WriteString("\n\n")
 	return responseBuilder.String()
 }
 
